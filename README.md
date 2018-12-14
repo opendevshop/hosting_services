@@ -24,50 +24,54 @@ Examples
 
 1. OAuth Call to list sites
 
-//Your Application key and secret
-$conskey = 'XXXXXXX';
-$conssec = 'XXXXXXXX';
+    ```php
+    //Your Application key and secret
+    $conskey = 'XXXXXXX';
+    $conssec = 'XXXXXXXX';
 
-//Your Application URL
-$api_url = 'http://aegir-server.local/aegir/hosting_site';
+    //Your Application URL
+    $api_url = 'http://aegir-server.local/aegir/hosting_site';
 
-try {
-  $oauth=new OAuth($conskey,$conssec,OAUTH_SIG_METHOD_HMACSHA1,OAUTH_AUTH_TYPE_URI);
-  $oauth->enableDebug();
+    try {
+      $oauth=new OAuth($conskey,$conssec,OAUTH_SIG_METHOD_HMACSHA1,OAUTH_AUTH_TYPE_URI);
+      $oauth->enableDebug();
 
-  $oauth->fetch("$api_url.json");
-  $sites = json_decode($oauth->getLastResponse());
-  return $sites;
+      $oauth->fetch("$api_url.json");
+      $sites = json_decode($oauth->getLastResponse());
+      return $sites;
 
-} catch(OAuthException $E) {
-  return $E;
-}
+    } catch(OAuthException $E) {
+      return $E;
+    }
+    ```
 
 2. OAuth Call to enable a specific site
 
-$conskey = 'dAnm6VqYz6gCUHzF7ncEntfBSLFUcSvY';
-$conssec = 'u8Lz3nukojWkJGuC4cgQuqvQA26rGpxB';
+    ```php
+    $conskey = 'dAnm6VqYz6gCUHzF7ncEntfBSLFUcSvY';
+    $conssec = 'u8Lz3nukojWkJGuC4cgQuqvQA26rGpxB';
 
-$consumer = new OAuthConsumer($conskey, $conssec, NULL);
-$api_url = 'http://aegir3-dev.aegir3.local/aegir/hosting_site/enable';
-$params = array('type' => 'enable');
-$request = OAuthRequest::from_consumer_and_token($consumer, NULL, 'POST', $api_url, $params);
-$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, NULL);
-$p = array('nid' => 'XXX');
-$data = http_build_query($p, '', '&');
-$options = array(
-  'headers' => array(
-    'Accept' => 'application/json',
-  ),
-  'method' => 'POST',
-  'data' => $data
-);
+    $consumer = new OAuthConsumer($conskey, $conssec, NULL);
+    $api_url = 'http://aegir3-dev.aegir3.local/aegir/hosting_site/enable';
+    $params = array('type' => 'enable');
+    $request = OAuthRequest::from_consumer_and_token($consumer, NULL, 'POST', $api_url, $params);
+    $request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, NULL);
+    $p = array('nid' => 'XXX');
+    $data = http_build_query($p, '', '&');
+    $options = array(
+      'headers' => array(
+        'Accept' => 'application/json',
+      ),
+      'method' => 'POST',
+      'data' => $data
+    );
 
-$response = drupal_http_request($request->to_url(), $options);
+    $response = drupal_http_request($request->to_url(), $options);
 
-if($response->code == 200){
-  $enable_task = json_decode($response->data);
-}
+    if($response->code == 200){
+      $enable_task = json_decode($response->data);
+    }
+    ```
 
 3. For many use cases, creating sites should be done via the client node and
    client user. The use case is"
@@ -77,28 +81,30 @@ if($response->code == 200){
       node is created and returned with an account property containing the user
       that was created including the oauth credentials.
 
-/**
- * Implements hook_user_insert().
- */
-function mymodule_user_insert(&$edit, $account, $category){
-  $consumer = new DrupalOAuthConsumer(user_password(32), user_password(32), array(
-    'callback_url' => 'example.com',
-    'uid' => $account->uid,
-    'name' => $account->mail,
-    'context' => 'aegir_authentication',
-    'provider_consumer' => TRUE,
-  ));
-  $consumer->write();
+    ```php
+    /**
+     * Implements hook_user_insert().
+     */
+    function mymodule_user_insert(&$edit, $account, $category){
+      $consumer = new DrupalOAuthConsumer(user_password(32), user_password(32), array(
+        'callback_url' => 'example.com',
+        'uid' => $account->uid,
+        'name' => $account->mail,
+        'context' => 'aegir_authentication',
+        'provider_consumer' => TRUE,
+      ));
+      $consumer->write();
 
-}
+    }
 
-/**
- * Implements hook_user_load().
- */
-function mymodule_user_load($users) {
-  module_load_include('inc', 'oauth_common');
-  foreach ($users as $uid => $user) {
-    $ci = oauth_common_user_consumers($user->uid);
-    $users[$uid]->oauth = $ci;
-  }
-}
+    /**
+     * Implements hook_user_load().
+     */
+    function mymodule_user_load($users) {
+      module_load_include('inc', 'oauth_common');
+      foreach ($users as $uid => $user) {
+        $ci = oauth_common_user_consumers($user->uid);
+        $users[$uid]->oauth = $ci;
+      }
+    }
+    ```

@@ -66,7 +66,18 @@ function hosting_services_permission(){
     'title' => t('Get Task'),
     'description' => t(''),
   );
-
+  $perms['create server'] = array(
+    'title' => t('Create a new server'),
+    'description' => t(''),
+  );
+  $perms['view server'] = array(
+    'title' => t('View Server'),
+    'description' => t(''),
+  );
+  $perms['list servers'] = array(
+    'title' => t('List Servers'),
+    'description' => t(''),
+  );
   return $perms;
 
 }
@@ -653,6 +664,120 @@ function hosting_services_services_resources() {
             'type' => 'string',
             'optional' => FALSE,
             'description' => t('The site node id'),
+            'source' => array('data' => 'nid'),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // Server Services
+  $resources['hosting_server'] = array(
+    'index' => array(
+      'callback' => 'hosting_services_list_server',
+      'help' => t('List all servers'),
+      'access arguments' => array('get server'),
+      'file' => array('type' => 'inc', 'name' => 'hosting_services.server', 'module' => 'hosting_services'),
+    ),
+    'retrieve' => array(
+      'callback' => 'hosting_get_server_by_hostname',
+      'help' => t('Fetch the server node'),
+      'access arguments' => array('get server'),
+      'args' => array(
+        array(
+          'name' => 'hostname',
+          'type' => 'string',
+          'optional' => FALSE,
+          'description' => t('The server hostname'),
+          'source' => array('path' => '0')
+        ),
+      ),
+    ),
+    'create' => array(
+      'callback' => 'hosting_services_save_server',
+      'help' => t('Create a server'),
+      'access arguments' => array('save server'),
+      'file' => array('type' => 'inc', 'name' => 'hosting_services.server', 'module' => 'hosting_services'),
+      'args' => array(
+        array(
+          'name' => 'hostname',
+          'type' => 'string',
+          'optional' => FALSE,
+          'description' => t('Hostname of the server to create'),
+          'source' => array('data' => 'hostname'),
+        ),
+        array(
+          'name' => 'data',
+          'type' => 'struct',
+          'description' => t('Server values to create'),
+          'source' => array('data' => 'data'),
+          'optional' => FALSE,
+        ),
+      ),
+    ),
+    'update' => array(
+      'callback' => 'hosting_services_save_server',
+      'help' => t('Update a server'),
+      'access arguments' => array('save server'),
+      'file' => array('type' => 'inc', 'name' => 'hosting_services.server', 'module' => 'hosting_services'),
+      'args' => array(
+        array(
+          'name' => 'hostname',
+          'type' => 'string',
+          'optional' => FALSE,
+          'description' => t('Hostname of the server to change'),
+          'source' => array('path' => 0),
+        ),
+        array(
+          'name' => 'data',
+          'type' => 'struct',
+          'description' => t('Server values to change'),
+          'source' => array('data' => 'data'),
+          'optional' => FALSE,
+        ),
+      ),
+    ),
+    'actions' => array(
+      'verify' => array(
+        'callback' => 'hosting_services_server_task',
+        'help' => t('Verify Server'),
+        'access arguments' => array("verify server"),
+        'file' => array('type' => 'inc', 'name' => 'hosting_services.server', 'module' => 'hosting_services'),
+        'args' => array(
+          array(
+            'name' => 'type',
+            'type' => 'string',
+            'optional' => FALSE,
+            'description' => t('The type of task'),
+            'source' => array('param' => 'type'),
+          ),
+          array(
+            'name' => 'nid',
+            'type' => 'string',
+            'optional' => FALSE,
+            'description' => t('The server node id'),
+            'source' => array('data' => 'nid'),
+          ),
+        ),
+      ),
+      'delete' => array(
+        'callback' => 'hosting_services_server_task',
+        'help' => t('Delete Server'),
+        'access arguments' => array("delete server"),
+        'file' => array('type' => 'inc', 'name' => 'hosting_services.server', 'module' => 'hosting_services'),
+        'args' => array(
+          array(
+            'name' => 'type',
+            'type' => 'string',
+            'optional' => FALSE,
+            'description' => t('The type of task'),
+            'source' => array('param' => 'type'),
+          ),
+          array(
+            'name' => 'nid',
+            'type' => 'string',
+            'optional' => FALSE,
+            'description' => t('The server node id'),
             'source' => array('data' => 'nid'),
           ),
         ),
